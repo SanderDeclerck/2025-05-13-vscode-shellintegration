@@ -29,6 +29,7 @@ async function runCommand(command: string): Promise<void> {
   }
 
   return new Promise((resolve, reject) => {
+    console.log(`${command} - Running command...`);
     const execution = shellIntegration.executeCommand(command);
 
     if (!execution) {
@@ -39,8 +40,12 @@ async function runCommand(command: string): Promise<void> {
     const listener = vscode.window.onDidEndTerminalShellExecution((e) => {
       if (e.execution === execution) {
         if (e.exitCode === 0) {
+          console.log(`${command} - Command executed successfully.`);
           resolve();
         } else {
+          console.error(
+            `${command} - Command failed with exit code ${e.exitCode}.`
+          );
           reject(new Error(`Command failed with exit code ${e.exitCode}`));
         }
         listener.dispose();
@@ -48,6 +53,9 @@ async function runCommand(command: string): Promise<void> {
     });
 
     setTimeout(() => {
+      console.error(
+        `${command} - Command execution timed out after 5 seconds.`
+      );
       reject(new Error("Command execution timed out after 5 seconds."));
       listener.dispose();
     }, 5000);
